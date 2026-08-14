@@ -1,148 +1,107 @@
-# Input data schemas
+# TORCH biomarker analysis
 
-The repository intentionally excludes patient-level study data. Create the following local files in `data/` from the final locked analysis dataset. Do not commit them unless public sharing is permitted by the ethics approval, patient consent, confidentiality agreements, and Data Access Committee requirements.
+R code accompanying the manuscript:
 
-Binary variables must be coded as `1` (present/positive/event) and `0` (absent/negative/censored). Missing values should be blank or `NA`.
+> Application of genetic features and serial ctDNA in estimating response and prognosis of immunotherapy-based total neoadjuvant therapy (iTNT) for microsatellite-stable locally advanced rectal cancer: data from the TORCH trial
 
-## `clinical_data.csv`
+This repository contains the downstream statistical analysis and figure-generation code used for the post hoc translational biomarker analysis of the prospective TORCH trial (NCT04518280). It does **not** contain FASTQ processing, read alignment, germline calling, somatic variant calling, ATG-Seq implementation, or other proprietary upstream bioinformatics workflows.
 
-One row per patient.
+## Important status note
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `arm` | `Consolidation` or `Induction` |
-| `age` | Age at enrollment, years |
-| `sex` | `Male` or `Female` |
-| `stage` | Clinical stage, e.g. `II` or `III` |
-| `cMRF` | Baseline mesorectal fascia involvement, `1/0` |
-| `cEMVI` | Baseline extramural vascular invasion, `1/0` |
-| `baseline_CEA` | Baseline carcinoembryonic antigen |
-| `post_CEA` | Post-iTNT carcinoembryonic antigen |
-| `mrTRG_T3` | Mid-iTNT mrTRG score, ordinal 1-5 |
-| `mrTRG_T4` | Post-iTNT mrTRG score, ordinal 1-5 |
-| `pTRG` | Postoperative pathological tumor regression grade; blank for non-surgical patients |
-| `treatment_choice` | `W&W`, `Surgery`, `Refused surgery`, or `PD` |
-| `CR` | Complete response, `1/0` |
-| `TMB` | Tumor mutational burden in mut/Mb; confirm final model scale |
-| `SMAD4_mut` | Baseline SMAD4 alteration, `1/0` |
-| `FLT3_amp` | Baseline FLT3 amplification, `1/0` |
-| `DFS_time` | Disease-free survival time |
-| `DFS_event` | DFS event, `1/0` |
-| `LRFS_time` | Local recurrence-free survival time |
-| `LRFS_event` | LRFS event, `1/0` |
-| `DMFS_time` | Distant metastasis-free survival time |
-| `DMFS_event` | DMFS event, `1/0` |
-| `OS_time` | Overall survival time |
-| `OS_event` | Death, `1/0` |
+`scripts/03_oncoprint.R` was rewritten from the plotting script supplied by the study team. The remaining scripts are clean, manuscript-aligned reproducibility implementations reconstructed from the Statistical analysis section, Results, figure legends, and supplementary-item descriptions. Before public release, the authors must run the scripts on the final analysis tables and verify that all numerical results and plots match the accepted manuscript. See `REVIEW_BEFORE_RELEASE.md`.
 
-Use one consistent time unit, preferably months, for all survival times. Confirm whether the origin is enrollment, treatment initiation, iTNT completion, or another prespecified date.
+## Repository structure
 
-## `ctdna_long.csv`
+```text
+TORCH-biomarker-analysis/
+├── R/
+│   └── functions.R
+├── scripts/
+│   ├── 00_install_packages.R
+│   ├── 01_prepare_analysis_data.R
+│   ├── 02_cohort_summary.R
+│   ├── 03_oncoprint.R
+│   ├── 04_response_associations.R
+│   ├── 05_logistic_loocv_roc.R
+│   ├── 06_survival_analysis.R
+│   ├── 07_swimmer_plot.R
+│   ├── 08_immune_cytokine_analysis.R
+│   └── 99_session_info.R
+├── data/
+│   ├── README.md
+│   └── templates/
+├── results/
+├── CITATION.cff
+└── REVIEW_BEFORE_RELEASE.md
+```
 
-One row per patient and plasma time point.
+## Analysis-to-manuscript map
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `timepoint` | `T1`, `T2`, `T3`, or `T4` |
-| `ctDNA_status` | Tissue-informed ctDNA status, `1/0` |
+| Script | Main purpose | Manuscript outputs |
+| --- | --- | --- |
+| `01_prepare_analysis_data.R` | Derive T1-T4 and latest available ctDNA variables | Table S2; model and survival inputs |
+| `02_cohort_summary.R` | Cohort characteristics and arm comparisons | Table 1; Table S1 |
+| `03_oncoprint.R` | Baseline genomic landscape | Figure 2A |
+| `04_response_associations.R` | Fisher tests, BH correction, Welch tests, Cochran-Armitage trend tests, univariable logistic models | Figure 2B-D; Figure 3A-C; Tables S5-S7 |
+| `05_logistic_loocv_roc.R` | Multivariable logistic regression, leave-one-out cross-validation, ROC curves and 1,000-iteration bootstrap AUC comparison | Figure 3D-I |
+| `06_survival_analysis.R` | Kaplan-Meier analyses, univariable/multivariable Cox models and forest plots | Figures 4B-E and 5; Figures S4-S6; Tables S8-S11 |
+| `07_swimmer_plot.R` | Patient follow-up and recurrence timeline | Figure 4A |
+| `08_immune_cytokine_analysis.R` | Exploratory mIHC and cytokine comparisons | Figures S1-S3 |
 
-The following variables are derived before figure generation:
+## Input data
 
-- `ctDNA_T1` to `ctDNA_T4` from individual time points;
-- `ctDNA_T23`, the latest available result at T2 or T3;
-- `ctDNA_T234`, the latest available result at T2, T3, or T4.
-- `ctDNA_clearance_T2` to `ctDNA_clearance_T4`, defined only among patients with baseline-positive ctDNA as `1` for subsequent negative status and `0` for persistent positivity.
+No individual-level patient data are included in this repository. Input tables should be created locally from the final locked analysis dataset using the schemas in `data/README.md`. Use de-identified study identifiers only.
 
-The latest value is selected by time-point order and is not a pooled or aggregate result.
+The genomic dataset is deposited in the Genome Sequence Archive for Human under controlled access, accession **HRA013886**, BioProject **PRJCA048403**. Access is subject to the repository's Data Access Committee procedure and the applicable ethics approval, patient consent, and confidentiality requirements.
 
-## `torch_population.csv` (optional; Table S1)
+## Software
 
-One row per patient in the overall evaluable TORCH population, including both patients included and not included in the biomarker sub-cohort.
+The manuscript reports analyses performed using R 4.4.1 and Python 3.10.14. These downstream scripts are written in R. Required packages are listed in `scripts/00_install_packages.R`.
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `included_biomarker_cohort` | Included in the 63-patient biomarker cohort, `1/0` |
-| `arm` | Treatment arm |
-| `age` | Age at enrollment |
-| `sex` | Sex |
-| `stage` | Clinical stage |
-| `cMRF` | Baseline mesorectal fascia involvement, `1/0` |
-| `cEMVI` | Baseline extramural vascular invasion, `1/0` |
+From the repository root, install packages once:
 
-## `mutations_long.csv`
+```r
+source("scripts/00_install_packages.R")
+```
 
-One row per patient-gene-alteration record from the final processed baseline tissue variant table.
+After placing the analysis tables in `data/`, run scripts in numerical order:
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `gene` | HGNC gene symbol |
-| `alteration` | Standardized alteration class |
-| `arm` | Treatment arm |
-| `CR` | Complete response, `1/0` |
+```r
+source("scripts/01_prepare_analysis_data.R")
+source("scripts/02_cohort_summary.R")
+source("scripts/03_oncoprint.R")
+source("scripts/04_response_associations.R")
+source("scripts/05_logistic_loocv_roc.R")
+source("scripts/06_survival_analysis.R")
+source("scripts/07_swimmer_plot.R")
+source("scripts/08_immune_cytokine_analysis.R")
+source("scripts/99_session_info.R")
+```
 
-Accepted alteration labels in the plotting script include `Missense`, `Inframe_indel`, `CNV`, `Amplification`, `Deletion`, `Frameshift`, `Splicing`, `Stop_gained`, `Stop_lost`, and `Fusion`.
+Outputs are written to `results/` and are ignored by Git by default.
 
-## `gene_order.csv`
+## Reproducibility and privacy
 
-Optional single-column file named `gene`, containing genes in the desired Oncoprint row order. When absent, the Oncoprint script selects the 30 most frequently altered genes.
+- Run all scripts from the repository root.
+- Use only de-identified patient identifiers.
+- Do not commit clinical datasets, controlled-access genomic data, credentials, local absolute paths, or company-internal pipelines.
+- The repository records analysis code only; access to controlled data does not imply permission to redistribute those data.
+- The exact variable coding, complete-case populations, and statistical outputs must be checked against the final manuscript before a GitHub release is created.
 
-## `swimmer_data.csv`
+## Repository organization reference
 
-One row per patient.
+The one-analysis-per-script organization was informed by the public [SOG-Lab OAC IntraTumourHeterogeneity repository](https://github.com/SOG-Lab/OAC_IntraTumourHeterogeneity). No code was copied from that repository.
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `arm` | Treatment arm |
-| `CR` | Complete response, `1/0` |
-| `followup_months` | Total follow-up duration |
-| `ongoing_followup` | Arrow at last follow-up, `1/0`; optional |
-| `surgery_months` | Time to surgery; blank if no surgery |
-| `local_recurrence_months` | Time to pelvic/local recurrence |
-| `distant_metastasis_months` | Time to distant metastasis |
-| `death_months` | Time to death |
+## Citation
 
-The four wide event columns above are the simplest input option. For a
-publication-style multilayer swimmer plot, the following two optional long-form
-tables can be supplied instead.
+After creating the public GitHub repository and Zenodo release, update `CITATION.cff` and cite both records in the manuscript. Suggested format:
 
-## `swimmer_intervals.csv` (optional)
+> Wang Y, Xu Y, Lin Y, et al. Analysis code accompanying the TORCH biomarker study. GitHub. https://github.com/OWNER/TORCH-biomarker-analysis (2026).
 
-One row per patient interval.
+> Wang Y, Xu Y, Lin Y, et al. Analysis code accompanying the TORCH biomarker study. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX (2026).
 
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `start_month` | Beginning of the interval |
-| `end_month` | End of the interval |
-| `interval_type` | Label such as `iTNT`, `W&W`, `Post-surgery follow-up`, or `Progression` |
+## Contact
 
-## `swimmer_events.csv` (optional)
+Zhen Zhang, Fudan University Shanghai Cancer Center  
+Email: zhen_zhang@fudan.edu.cn
 
-One row per patient event. When provided, this table takes precedence over the
-wide event columns in `swimmer_data.csv`.
-
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `event_month` | Time of event |
-| `event_type` | `Surgery`, `Local recurrence`, `Distant metastasis`, `Death`, or another prespecified label |
-
-## `immune_cytokine_long.csv`
-
-One row per patient, marker, and time point.
-
-| Column | Definition |
-| --- | --- |
-| `patient_id` | De-identified patient identifier |
-| `assay` | `mIHC` or `Cytokine` |
-| `marker` | Marker name, e.g. `CD8`, `CD8_PD1`, `CD4`, `CD4_FOXP3` |
-| `timepoint` | `T1`/`Baseline` or `T4`/`Post` |
-| `value` | Quantitative measurement |
-| `CR` | Complete response, `1/0` |
-
-Confirm the exact assay-specific normalization, units, and handling of values below the detection limit before public release.

@@ -1,0 +1,61 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the software and the associated manuscript."
+title: "Analysis code accompanying the TORCH biomarker study"
+type: software
+version: 1.0.0
+date-released: 2026-08-13
+repository-code: "https://github.com/OWNER/TORCH-biomarker-analysis"
+authors:
+  - family-names: Wang
+    given-names: Yaqi
+  - family-names: Xu
+    given-names: Yang
+  - family-names: Lin
+    given-names: Yingxuan
+  - family-names: Liu
+    given-names: Yujun
+  - family-names: Jing
+    given-names: Qifan
+  - family-names: Shen
+    given-names: Lijun
+  - family-names: Wan
+    given-names: Juefeng
+  - family-names: Wang
+    given-names: Yan
+  - family-names: Zhang
+    given-names: Hui
+  - family-names: Wu
+    given-names: Ruiyan
+  - family-names: Zhou
+    given-names: Shujuan
+  - family-names: Chen
+    given-names: Yajie
+  - family-names: Zhang
+    given-names: Zhiyuan
+  - family-names: Wang
+    given-names: Jingwen
+  - family-names: Sun
+    given-names: Yiqun
+  - family-names: Bao
+    given-names: Hairong
+  - family-names: Ou
+    given-names: Qiuxiang
+  - family-names: Bao
+    given-names: Hua
+  - family-names: Shao
+    given-names: Yang
+  - family-names: Cai
+    given-names: Sanjun
+  - family-names: Xu
+    given-names: Ye
+  - family-names: Zhang
+    given-names: Zhen
+  - family-names: Xia
+    given-names: Fan
+keywords:
+  - circulating tumor DNA
+  - rectal cancer
+  - immunotherapy
+  - total neoadjuvant therapy
+  - biomarker
+
