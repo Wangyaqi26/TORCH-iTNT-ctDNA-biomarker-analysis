@@ -47,17 +47,5 @@ Patient-level data are not included in this repository. Genomic data are deposit
 
 ## Software
 
-The manuscript reports R 4.4.1 and Python 3.10.14. The code in this repository is written in R.
+The manuscript reports R 4.4.1. 
 
-## Citation
-
-After the GitHub repository and Zenodo record are finalized, update the links below:
-
-> Wang Y, Xu Y, Lin Y, et al. Analysis code accompanying the TORCH biomarker study. GitHub. https://github.com/OWNER/TORCH-biomarker-analysis (2026).
-
-> Wang Y, Xu Y, Lin Y, et al. Analysis code accompanying the TORCH biomarker study. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX (2026).
-
-## Contact
-
-Zhen Zhang, Fudan University Shanghai Cancer Center  
-Email: zhen_zhang@fudan.edu.cn
